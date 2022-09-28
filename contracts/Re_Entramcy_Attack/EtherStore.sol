@@ -1,42 +1,49 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.9;
 
-contract EtherStore{
-    mapping(address=>uint) public balances;
-
-    function deposit() public payable{
-        balances[msg.sender]+=msg.value;
+contract EtherStore {
+    mapping(address => uint256) public balances;
+    bool internal locked;
+    modifier noReentrant() {
+        require(!locked, "No re-entracncy");
+        locked = true;
+        _;
+        locked = false;
     }
+
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+    }
+
     ///not having enough funds;
     error insufficient_funds();
 
     ///failed to send ether
-    error not_confirm( );
+    error not_confirm();
 
-    function withdraw() public {
-        uint bal=balances[msg.sender];
+    function withdraw() public noReentrant{
+        uint256 bal = balances[msg.sender];
 
-        if(bal<0){
+        if (bal <= 0) {
             revert insufficient_funds();
         }
 
         (bool sent, ) = msg.sender.call{value: bal}("");
 
-        if(!sent){
+        if (!sent) {
             revert not_confirm();
         }
 
-        balances[msg.sender]=0;
+        balances[msg.sender] = 0;
     }
 
-    function getBalance() public view returns(uint){
-            return address(this).balance;
+    function getBalance() public view returns (uint256) {
+        return address(this).balance;
     }
-
 }
 
-contract Attack{
-     EtherStore public etherStore;
+contract Attack {
+    EtherStore public etherStore;
 
     constructor(address _etherStoreAddress) {
         etherStore = EtherStore(_etherStoreAddress);
@@ -49,6 +56,10 @@ contract Attack{
         }
     }
 
+    receive() external payable{
+
+    }
+
     function attack() external payable {
         require(msg.value >= 1 ether);
         etherStore.deposit{value: 1 ether}();
@@ -56,9 +67,7 @@ contract Attack{
     }
 
     // Helper function to check the balance of this contract
-    function getBalance() public view returns (uint) {
+    function getBalance() public view returns (uint256) {
         return address(this).balance;
     }
-
-
 }
