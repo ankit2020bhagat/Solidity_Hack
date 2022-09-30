@@ -1,6 +1,6 @@
 const {ethers} = require("hardhat");
 
-describe.only("TimeLock",function(){
+describe("TimeLock",function(){
     let deployContract,addresses
     it("Contract Deployment",async function(){
        [...addresses] =await ethers.getSigners();

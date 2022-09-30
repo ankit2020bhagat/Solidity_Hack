@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 
-describe.only("time lock Attack", function () {
+describe("time lock Attack", function () {
     let deployContract, address1;
 
     it("Contract Deployment", async function () {
