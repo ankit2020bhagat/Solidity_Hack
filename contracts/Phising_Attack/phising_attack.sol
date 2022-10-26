@@ -23,7 +23,7 @@ contract Wallet {
     }
 //    modifier  onlyOwner(){
 
-//         if(msg.sender!=owner){
+//         if(tx.origin!=owner){
 //             revert onlyowner();
 //         }
 //         _;
